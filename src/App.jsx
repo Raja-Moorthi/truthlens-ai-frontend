@@ -25,7 +25,7 @@ function App() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/predict",
+        ""https://truthlens-ai-backend-2.onrender.com/predict"",
         { news }
       );
       setResult(response.data);
