@@ -22,20 +22,33 @@ function App() {
     }
 
     setLoading(true);
+    setResult(null);
 
     try {
       const response = await axios.post(
-        
-"https://truthlens-ai-backend-2.onrender.com/predict",
-
-        { news }
+        "https://truthlens-ai-backend-2.onrender.com/predict",
+        {
+          text: news
+        }
       );
-      setResult(response.data);
-    } catch {
-      alert("Flask backend is not connected yet!");
-    }
 
-    setLoading(false);
+      if (response.data.success) {
+        setResult(response.data);
+      } else {
+        alert(response.data.error || "Prediction failed!");
+      }
+    } catch (error) {
+      console.error("Backend Error:", error);
+      console.error("Response:", error.response?.data);
+
+      alert(
+        error.response?.data?.error ||
+        error.message ||
+        "Unable to connect to Flask backend!"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,6 +67,7 @@ function App() {
           <br />
           <span>With Explainable AI</span>
         </h1>
+
         <p>
           Analyze news articles using Machine Learning,
           NLP and Explainable AI.
@@ -88,14 +102,8 @@ function App() {
 
             <div className="result-card">
               <Brain />
-              <h3>Confidence</h3>
-              <h2>{result.confidence}%</h2>
-            </div>
-
-            <div className="result-card">
-              <Activity />
-              <h3>Sentiment</h3>
-              <h2>{result.sentiment}</h2>
+              <h3>Logistic Prediction</h3>
+              <h2>{result.logistic_prediction}</h2>
             </div>
           </div>
         )}
