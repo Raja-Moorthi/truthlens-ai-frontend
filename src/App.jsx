@@ -6,7 +6,8 @@ import {
   Search,
   Newspaper,
   Brain,
-  Activity
+  Activity,
+  ShieldAlert
 } from "lucide-react";
 import "./App.css";
 
@@ -27,9 +28,7 @@ function App() {
     try {
       const response = await axios.post(
         "https://truthlens-ai-backend-2.onrender.com/predict",
-        {
-          text: news
-        }
+        { text: news }
       );
 
       if (response.data.success) {
@@ -39,17 +38,18 @@ function App() {
       }
     } catch (error) {
       console.error("Backend Error:", error);
-      console.error("Response:", error.response?.data);
-
       alert(
         error.response?.data?.error ||
-        error.message ||
-        "Unable to connect to Flask backend!"
+        "Unable to connect to backend!"
       );
     } finally {
       setLoading(false);
     }
   };
+
+  // IMPORTANT: Verify your dataset's label mapping first!
+  // Current assumption: 0 = Fake, 1 = Real
+  const isReal = result?.prediction === 1;
 
   return (
     <div className="app">
@@ -67,7 +67,6 @@ function App() {
           <br />
           <span>With Explainable AI</span>
         </h1>
-
         <p>
           Analyze news articles using Machine Learning,
           NLP and Explainable AI.
@@ -94,16 +93,36 @@ function App() {
 
         {result && (
           <div className="results">
-            <div className="result-card">
-              <Activity />
-              <h3>Prediction</h3>
-              <h2>{result.prediction}</h2>
+            <div className={`result-card ${isReal ? "real" : "fake"}`}>
+              {isReal ? (
+                <ShieldCheck size={40} />
+              ) : (
+                <ShieldAlert size={40} />
+              )}
+
+              <h3>News Classification</h3>
+
+              <h2>
+                {isReal ? "REAL NEWS" : "FAKE NEWS"}
+              </h2>
+
+              <p>
+                {isReal
+                  ? "The model classified this article as real."
+                  : "The model classified this article as fake."}
+              </p>
             </div>
 
             <div className="result-card">
-              <Brain />
+              <Brain size={35} />
               <h3>Logistic Prediction</h3>
               <h2>{result.logistic_prediction}</h2>
+            </div>
+
+            <div className="result-card">
+              <Activity size={35} />
+              <h3>Model Prediction</h3>
+              <h2>{result.prediction}</h2>
             </div>
           </div>
         )}
